@@ -4,6 +4,13 @@ This is a tool to count the TLS protocol versions and ciphers encountered by
 your server (or client). It is written (read: shamelessly copied) in C for
 maximum efficiency on a high-traffic servers.
 
+This program is inspired by xnyhps' great
+[series](https://blog.thijsalkema.de/blog/2013/08/26/the-state-of-tls-on-xmpp-1/)
+[of](https://blog.thijsalkema.de/blog/2013/08/28/the-state-of-tls-on-xmpp-2/)
+[posts](https://blog.thijsalkema.de/blog/2013/09/02/the-state-of-tls-on-xmpp-3/)
+about the state of TLS on XMPP. It is based on example code by the Tcpdump
+Group.
+
 ## Restrictions
 
 This tool so far only supports IPv4, has a hacked-together TCP packet parser
