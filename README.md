@@ -74,6 +74,18 @@ A ClientHello contains the list of supported ciphers, in hexadecimal format.
 A ServerHello contains the chosen cipher suite, in hex. This is what matters
 for the connection.
 
+Because hex is not very readable, you can convert the codes into their
+Wireshark-equivalent names, by filtering the output with the following `sed`
+command:
+
+	./tls-hello-dump eth0 | sed -f ./readable.sed
+	...
+	83.223.75.24    192.168.23.42   TLSv1 ServerHello TLSv1 cipher TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+	...
+
+**Beware:** The script will convert any uppercase two-byte hex numbers it
+encounters into their equivalent cipher names.
+
 ## License
 
 
