@@ -19,6 +19,11 @@ and its configuration options are severely limited.
 If you feed it bad packets, it will die a horrible death, open a reverse shell
 or eat your babies.
 
+Currently, the tool is creating two log entries for each new SSL/TLS
+connection. This will bias your statistics towards clients with bad
+connectivity, and against long-living connections. *This is not a replacement
+for dumping the SSL/TLS ciphers from all open connections to your server.*
+
 ## Compilation
 
 To compile, simply run `make`. Have a look at the Makefile to tune the output
