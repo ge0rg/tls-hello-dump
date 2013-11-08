@@ -217,6 +217,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 /* default snap length (maximum bytes per packet to capture) */
 #define SNAP_LEN 1518
@@ -309,10 +310,10 @@ void
 print_app_usage(void)
 {
 
-	printf("Usage: %s <interface> [<filter>]\n", APP_NAME);
+	printf("Usage: %s <source> [<filter>]\n", APP_NAME);
 	printf("\n");
 	printf("Options:\n");
-	printf("    interface    Listen on <interface> for packets.\n");
+	printf("    source       Get packets from <source> (PCAP file or network interface)\n");
 	printf("    filter       Override packet filter string. Available presets: https xmpp\n");
 	printf("\n");
 
@@ -493,6 +494,7 @@ int main(int argc, char **argv)
 {
 
 	char *dev = NULL;			/* capture device name */
+	int dev_is_file = 0;			/* capture from a file, not from the network */
 	char errbuf[PCAP_ERRBUF_SIZE];		/* error buffer */
 	pcap_t *handle;				/* packet capture handle */
 
@@ -533,7 +535,11 @@ int main(int argc, char **argv)
 		}
 	}
 	
+	/* try to open capture "device" as a file, if it fails */
 	/* get network number and mask associated with capture device */
+	if (access(dev, R_OK) != -1) {
+		dev_is_file = 1;
+	} else
 	if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1) {
 		fprintf(stderr, "Couldn't get netmask for device %s: %s\n",
 		    dev, errbuf);
@@ -542,7 +548,7 @@ int main(int argc, char **argv)
 	}
 
 	/* print capture info */
-	printf("Device: %s\n", dev);
+	printf("Source: %s\n", dev);
 	printf("Filter expression: %s\n", filter_exp);
 	printf("\n");
 #ifdef LOG_COUNTER
@@ -557,9 +563,12 @@ int main(int argc, char **argv)
 	printf("Packet content\n");
 
 	/* open capture device */
-	handle = pcap_open_live(dev, SNAP_LEN, 1, 1000, errbuf);
+	if (dev_is_file)
+		handle = pcap_open_offline(dev, errbuf);
+	else
+		handle = pcap_open_live(dev, SNAP_LEN, 1, 1000, errbuf);
 	if (handle == NULL) {
-		fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
+		fprintf(stderr, "Couldn't open source %s: %s\n", dev, errbuf);
 		exit(EXIT_FAILURE);
 	}
 
