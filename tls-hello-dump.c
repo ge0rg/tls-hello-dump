@@ -486,7 +486,14 @@ got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 	
 }
 
-#define FILTER_TLS	"tcp[32]=22 and (tcp[37]=1 or tcp[37]=2)"
+// PCAP has no payload[offset] field, so we need to get the payload offset
+// from the TCP header (offset 12, upper 4 bits, number of 4-byte words):
+#define FILTER_TCPSIZE	"tcp[12]/16*4"
+// TLS Handshake starts with a '22' byte, version, length,
+// and then '01'/'02' for client/server hello
+#define FILTER_TLS	"tcp[" FILTER_TCPSIZE "]=22 and " \
+			"(tcp[" FILTER_TCPSIZE "+5]=1 or tcp[" FILTER_TCPSIZE "+5]=2)"
+
 char *filter_https = "tcp port 443 and " FILTER_TLS;
 char *filter_xmpp = "(tcp port 5222 or tcp port 5223) and " FILTER_TLS;
 
