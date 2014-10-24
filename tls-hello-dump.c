@@ -434,7 +434,7 @@ got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 		return;
 	}
 	if (size_payload < OFFSET_CIPHER_LIST + 3) { // at least one cipher + compression
-		printf("TLS handshake header too short: %u bytes\n", size_tcp);
+		printf("TLS handshake header too short: %d bytes\n", size_payload);
 		return;
 	}
 
