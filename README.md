@@ -24,6 +24,9 @@ connection. This will bias your statistics towards clients with bad
 connectivity, and against long-living connections. *This is not a replacement
 for dumping the SSL/TLS ciphers from all open connections to your server.*
 
+If you specify a network device, it will enter PROMISC mode. Use only
+if you are authorized to sniff the network.
+
 ## Compilation
 
 To compile, simply run `make`. Have a look at the Makefile to tune the output
