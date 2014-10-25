@@ -360,9 +360,10 @@ got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 	const struct sniff_ethernet *ethernet;  /* The ethernet header [1] */
 	const struct sniff_ip *ip;              /* The IP header */
 	const struct sniff_tcp *tcp;            /* The TCP header */
-	const u_char *payload;                    /* Packet payload */
+	const u_char *payload;                  /* Packet payload */
 
 	int size_ip;
+	int size_iptotal;
 	int size_tcp;
 	int size_payload;
 	
@@ -423,18 +424,26 @@ got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 	printf("%hu\t", ntohs(tcp->th_dport));
 #endif
 	
-	/* define/compute tcp payload (segment) offset */
-	payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_tcp);
-	
 	/* compute tcp payload (segment) size */
-	size_payload = ntohs(ip->ip_len) - (size_ip + size_tcp);
-	
-	if (payload[0] != TLS_HANDSHAKE) {
-		printf("Not a TLS handshake: 0x%02hhx\n", payload[0]);
-		return;
+	size_iptotal = ntohs(ip->ip_len);
+	if (size_iptotal == 0 || size_iptotal > header->caplen)
+	{
+		/* if TSO is used, ip_len is 0x0000 */
+		/* only process up to caplen bytes. */
+		size_iptotal = header->caplen;
 	}
+	size_payload = size_iptotal - (size_ip + size_tcp);
+
 	if (size_payload < OFFSET_CIPHER_LIST + 3) { // at least one cipher + compression
 		printf("TLS handshake header too short: %d bytes\n", size_payload);
+		return;
+	}
+
+	/* define/compute tcp payload (segment) offset */
+	payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_tcp);
+
+	if (payload[0] != TLS_HANDSHAKE) {
+		printf("Not a TLS handshake: 0x%02hhx\n", payload[0]);
 		return;
 	}
 
