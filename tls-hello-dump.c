@@ -520,6 +520,9 @@ int main(int argc, char **argv)
 	bpf_u_int32 mask;			/* subnet mask */
 	bpf_u_int32 net;			/* ip */
 
+	/* Make sure pipe sees new packets unbuffered. */
+	 setvbuf(stdout, (char *)NULL, _IOLBF, 0);
+
 	print_app_banner();
 
 	/* check for capture device name on command-line */
