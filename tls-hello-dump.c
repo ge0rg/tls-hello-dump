@@ -504,7 +504,7 @@ got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 			"(tcp[" FILTER_TCPSIZE "+5]=1 or tcp[" FILTER_TCPSIZE "+5]=2)"
 
 char *filter_https = "tcp port 443 and " FILTER_TLS;
-char *filter_xmpp = "(tcp port 5222 or tcp port 5223) and " FILTER_TLS;
+char *filter_xmpp = "(tcp port 5222 or tcp port 5223 or tcp port 5269) and " FILTER_TLS;
 
 int main(int argc, char **argv)
 {
