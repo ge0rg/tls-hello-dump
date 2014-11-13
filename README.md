@@ -89,6 +89,48 @@ command:
 **Beware:** The script will convert any uppercase two-byte hex numbers it
 encounters into their equivalent cipher names.
 
+## Obtaining Stats
+
+The distribution comes with a helper script written in GAWK that counts the
+used protocols and ciphers and outputs friendly stats:
+
+	./tls-hello-dump stored-log.pcap | ./count-negotiated.awk
+	Protocols:
+	18	TLSv1.2
+	4	TLSv1
+
+	Ciphers:
+	20	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+	1	TLS_RSA_WITH_AES_256_CBC_SHA256
+	1	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+
+	Protocols+Ciphers:
+	16	TLSv1.2	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+	4	TLSv1	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+	1	TLSv1.2	TLS_RSA_WITH_AES_256_CBC_SHA256
+	1	TLSv1.2	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+
+Please consider that if you generate statistics from `tls-hello-dump`, these
+are skewed towards clients making more connections. You can reduce the effect
+by only counting each individual IP+protocol+cipher combination once:
+
+	./tls-hello-dump stored-log.pcap | sort | uniq | ./count-negotiated.awk
+	Protocols:
+	6	TLSv1.2
+	4	TLSv1
+
+	Ciphers:
+	8	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+	1	TLS_RSA_WITH_AES_256_CBC_SHA256
+	1	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+
+	Protocols+Ciphers:
+	4	TLSv1	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+	4	TLSv1.2	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+	1	TLSv1.2	TLS_RSA_WITH_AES_256_CBC_SHA256
+	1	TLSv1.2	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+
+
 ## License
 
 
