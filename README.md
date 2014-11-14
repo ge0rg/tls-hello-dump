@@ -39,15 +39,25 @@ parameters (`#define`s). Possible compile-time options:
 
 ## Usage
 
-Run the tool as root, supply at least the network interface as a parameter:
+You can run the tool on a PCAP dump file or directly on a network interface
+(which requires root permissions/CAP_NET_ADMIN or similar):
 
-	./tls-hello-dump eth0
+```sh
+./tls-hello-dump ./stored-log.pcap
+./tls-hello-dump eth0
+```
 
-You can add a filter as well:
+You can add a filter to select which protocol to use:
 
-	./tls-hello-dump eth0 xmpp
-	./tls-hello-dump eth0 https
-	./tls-hello-dump eth0 'tcp port 995 and tcp[32]=22 and (tcp[37]=1 or tcp[37]=2)'
+```sh
+./tls-hello-dump eth0 xmpp	# Filter XMPP C2S (5222, 5223) and S2S (5269)
+./tls-hello-dump eth0 https	# Filter HTTPS (443)
+./tls-hello-dump eth0 995	# Filter POP3S (995)
+
+# The following is a manually crafted POP3/POP3S filter
+./tls-hello-dump eth0 '(tcp port 110 or tcp port 995)
+	and tcp[tcp[12]/16*4]=22 and (tcp[tcp[12]/16*4+5]=1 or tcp[tcp[12]/16*4+5]=2)'
+```
 
 (The cryptic filter part starting with `and` is needed to filter out TLS Hello
 packets. Never forget to add it!)
