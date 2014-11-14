@@ -310,11 +310,12 @@ void
 print_app_usage(void)
 {
 
-	printf("Usage: %s <source> [<filter>]\n", APP_NAME);
+	printf("Usage: %s <source> [<filter>|<port>]\n", APP_NAME);
 	printf("\n");
 	printf("Options:\n");
 	printf("    source       Get packets from <source> (PCAP file or network interface)\n");
 	printf("    filter       Override packet filter string. Available presets: https xmpp\n");
+	printf("    port         Port number on which TLS hellos will be searched\n");
 	printf("\n");
 
 return;
@@ -505,6 +506,7 @@ got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 
 char *filter_https = "tcp port 443 and " FILTER_TLS;
 char *filter_xmpp = "(tcp port 5222 or tcp port 5223 or tcp port 5269) and " FILTER_TLS;
+char *filter_format = "tcp port %-5hu and " FILTER_TLS; // strlen("%-5hu")==5, enough to fit port
 
 int main(int argc, char **argv)
 {
@@ -516,6 +518,7 @@ int main(int argc, char **argv)
 
 	/* filter expression [3]: port 5222, TLS Handshake, ClientHello/ServerHello */
 	char *filter_exp = filter_https;
+	uint16_t filter_port;
 	struct bpf_program fp;			/* compiled filter program (expression) */
 	bpf_u_int32 mask;			/* subnet mask */
 	bpf_u_int32 net;			/* ip */
@@ -537,6 +540,11 @@ int main(int argc, char **argv)
 		if (strcmp(argv[2], "xmpp") == 0)
 			filter_exp = filter_xmpp;
 		else
+		if (sscanf(argv[2], "%hu", &filter_port) == 1) {
+			/* HACK: filter_format is long enough to fit formatted string */
+			filter_exp = strdup(filter_format);
+			sprintf(filter_exp, filter_format, filter_port);
+		} else
 			filter_exp = argv[2];
 	}
 	else if (argc > 3) {
