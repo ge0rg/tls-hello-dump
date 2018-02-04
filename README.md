@@ -29,6 +29,10 @@ if you are authorized to sniff the network.
 
 ## Compilation
 
+You need to have the PCAP dev package; e.g. on Debian/Ubuntu:
+
+	apt install libpcap0.8-dev
+
 To compile, simply run `make`. Have a look at the Makefile to tune the output
 parameters (`#define`s). Possible compile-time options:
 
