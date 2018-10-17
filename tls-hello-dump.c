@@ -207,6 +207,7 @@
 #define APP_COPYRIGHT	"Copyright (c) 2013 Georg Lukas, based on code by the Tcpdump Group."
 #define APP_DISCLAIMER	"THERE IS ABSOLUTELY NO WARRANTY FOR THIS PROGRAM."
 
+#include <pwd.h>
 #include <pcap.h>
 #include <stdio.h>
 #include <string.h>
@@ -288,6 +289,9 @@ print_app_banner(void);
 void
 print_app_usage(void);
 
+void
+drop_privileges(char *);
+
 /*
  * app name/banner
  */
@@ -320,6 +324,35 @@ print_app_usage(void)
 
 return;
 }
+
+/*
+ * drop privileges
+ */
+void
+drop_privileges(char *username)
+{
+	struct passwd *pwd;
+
+	pwd = getpwnam(username);
+	if (pwd == NULL)
+	{
+		perror("getpwnam()");
+		exit(EXIT_FAILURE);
+	}
+
+	if (setgid(pwd->pw_gid) == -1)
+	{
+		perror("setgid()");
+		exit(EXIT_FAILURE);
+	}
+
+	if (setuid(pwd->pw_gid) == -1)
+	{
+		perror("setuid()");
+		exit(EXIT_FAILURE);
+	}
+}
+
 
 #define SSL_MIN_GOOD_VERSION	0x002
 #define SSL_MAX_GOOD_VERSION	0x304	// let's be optimistic here!
@@ -598,6 +631,10 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Couldn't open source %s: %s\n", dev, errbuf);
 		exit(EXIT_FAILURE);
 	}
+
+	/* drop privileges to nobody user if handle is a device */
+	if (!dev_is_file)
+		drop_privileges("nobody");
 
 	/* make sure we're capturing on an Ethernet device [2] */
 	if (pcap_datalink(handle) != DLT_EN10MB) {
